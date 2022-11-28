@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const AuthRoles = require('../utils/authRoles');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema(
     {
@@ -33,5 +36,15 @@ const userSchema = new mongoose.Schema(
         timestamps: true
     }
 );
+
+// encrypting the password before saving in the database
+userSchema.pre("save", async function(next){
+
+    // if the password is not modified, just move to next(),but if it is modified then encrypt, update it and move to next.
+
+    if(!this.modified('password')) return next();
+    this.password = await bcrypt.hash(this.password,10);
+    next();
+})
 
 module.exports = mongoose.model("user",userSchema);
