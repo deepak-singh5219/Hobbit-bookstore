@@ -1,81 +1,91 @@
-const mongoose = require('mongoose');
-const AuthRoles = require('../utils/authRoles');
+const mongoose = require("mongoose");
+const AuthRoles = require("../utils/authRoles");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const config = require("../config/index");
-const { lutimesSync } = require('fs');
+const { lutimesSync } = require("fs");
 
 const userSchema = new mongoose.Schema(
-    {
-    name:{
-        type: String,
-        required: [true,"Name is required"],
-        maxLength: [50, "Name max limit exceeded"],
-        trim: true
+  {
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      maxLength: [50, "Name max limit exceeded"],
+      trim: true,
     },
-    email:{
-        type: String,
-        required: [true,"email is required"],
-        unique:true,
+    email: {
+      type: String,
+      required: [true, "email is required"],
+      unique: true,
     },
-    password:{
-        type: String,
-        required: [true,"Password is required"],
-        minLength: [8, "Password must be minimum of 8 charactors"],
-        select: false
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minLength: [8, "Password must be minimum of 8 charactors"],
+      select: false,
     },
-    role:{
-        type: String,
-        enum: Object.values(AuthRoles),
-        default: AuthRoles.USER
+    role: {
+      type: String,
+      enum: Object.values(AuthRoles),
+      default: AuthRoles.USER,
     },
     forgotPasswordToken: String,
     forgotPasswordExpiry: Date,
-
-    },
-    {
-        timestamps: true
-    }
+  },
+  {
+    timestamps: true,
+  }
 );
 
-//mongoose hooks 
+//mongoose hooks
 
 // encrypting the password before saving in the database
-userSchema.pre("save", async function(next){
+userSchema.pre("save", async function (next) {
+  // if the password is not modified, just move to next(),but if it is modified then encrypt, update it and move to next.
 
-    // if the password is not modified, just move to next(),but if it is modified then encrypt, update it and move to next.
-
-    if(!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password,10);
-    next();
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
 // mongoose methods
 
 userSchema.methods = {
-    //compare Password
-    createPassword: async function(inputPassword)
-    {
-        return await bcrypt.compare(inputPassword, this.password);
-    },
+  //compare Password
+  createPassword: async function (inputPassword) {
+    return await bcrypt.compare(inputPassword, this.password);
+  },
 
-    //generate JWT Token
-    genJwtToken: function(){
-        return jwt.sign(
-            {
-                _id: this._id,
-                role:this.role
-            },
-           config.JWT_SECRET,
-            {
-                expiresIn: config.JWT_EXPIRY
-            } 
-        )
-    }
+  //generate JWT Token
+  genJwtToken: function () {
+    return jwt.sign(
+      {
+        _id: this._id,
+        role: this.role,
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: config.JWT_EXPIRY,
+      }
+    );
+  },
 
-}
+  // forget password functionality
+  generateForgotPasswordToken: function () {
+    const forgotPasswordToken = crypto.randomBytes(20).toString("hex");
+    // encrypting and pushing to database
+    // generating encrypted hash is very fast and asynchronous process and doesn't require async await
+    this.forgotPasswordToken = crypto
+      .createHash("sha256")
+      .update(forgotPasswordToken)
+      .digest("hex");
 
- 
+    this.forgotPasswordExpiry = Date.now() + 20 * 60 * 1000;
 
-module.exports = mongoose.model("user",userSchema);
+    //return token to user
+    return forgotPasswordToken;
+  },
+};
+
+module.exports = mongoose.model("user", userSchema);
