@@ -1,8 +1,8 @@
-const User = require(".../models/userModel");
-const asyncHandler = require(".../services/asyncHandler");
-const CustomError = require(".../utils/customError");
-const cookieOptions = require(".../utils/cookieOptions");
-const mailHelper = require(".../utils/mailHelper");
+const User = require("../../models/userModel");
+const asyncHandler = require("../../services/asyncHandler");
+const CustomError = require("../../utils/customError");
+const cookieOptions = require("../../utils/cookieOptions");
+const mailHelper = require("../../utils/mailHelper");
 
 /******************************************************
  * @FORGOT_PASSWORD
