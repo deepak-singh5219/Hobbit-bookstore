@@ -1,8 +1,7 @@
-const User = require('.../models/userModel');
-const asyncHandler = require('.../services/asyncHandler');
-const CustomError = require('.../utils/customError');
-const cookieOptions = require('.../utils/cookieOptions');
-
+const User = require("../../models/userModel");
+const asyncHandler = require("../../services/asyncHandler");
+const CustomError = require("../../utils/customError");
+const cookieOptions = require("../../utils/cookieOptions");
 /******************************************************
  * @LOGOUT
  * @route http://localhost:4000/api/auth/logout
