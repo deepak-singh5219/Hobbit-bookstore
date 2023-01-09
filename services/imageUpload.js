@@ -11,7 +11,7 @@ const s3FileUpload = asyncHandler(async({bucketName, key, body, contentType}) =>
     .promise()
 })
 
-const s3DeleteFile = asyncHandler(async({bucketName, key}) => {
+const s3FileDelete = asyncHandler(async({bucketName, key}) => {
 
     return await s3.deleteObject({
         Bucket: bucketName,
@@ -20,4 +20,4 @@ const s3DeleteFile = asyncHandler(async({bucketName, key}) => {
     .promise()
 })
 
-module.exports = {s3FileUpload,s3DeleteFile};
+module.exports = {s3FileUpload,s3FileDelete};
